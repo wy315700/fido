@@ -27,353 +27,390 @@
 
 #### UAFMessage Dictionary
 
-    Dictionary UAFMessage {
-        DOMString uafProtocolMessage;
-        Object additionalData;
-    }
+```java
+Dictionary UAFMessage {
+    DOMString uafProtocolMessage;
+    Object additionalData;
+}
+```
 
 #### UAFResponseCallback
 
-    callback UAFResponseCallback = void (UAFMessage uafResponse);
+```java
+callback UAFResponseCallback = void (UAFMessage uafResponse);
+```
 
 #### ErrorCallback
 
-    callback ErrorCallback = void (ErrorCode code);
-    interface ErrorCode {
-        const short NO_ERROR = 0x0;
-        FIDO UAF Application API and Transport Binding Specification
-        const short WAIT_USER_ACTION
-        const short INSECURE_TRANSPORT
-        const short USER_CANCELLED
-        const short UNSUPPORTED_VERSION
-        const short NO_SUITABLE_AUTHENTICATOR = 0x5;
-        const short PROTOCOL_ERROR const short UNTRUSTED_FACET_ID const short UNKNOWN
-    }
+```java
+callback ErrorCallback = void (ErrorCode code);
+interface ErrorCode {
+    const short NO_ERROR = 0x0;
+    FIDO UAF Application API and Transport Binding Specification
+    const short WAIT_USER_ACTION
+    const short INSECURE_TRANSPORT
+    const short USER_CANCELLED
+    const short UNSUPPORTED_VERSION
+    const short NO_SUITABLE_AUTHENTICATOR = 0x5;
+    const short PROTOCOL_ERROR const short UNTRUSTED_FACET_ID const short UNKNOWN
+}
+```
 
 #### notifyUAFResult Operation
 
-    void notifyUAFResult(int responseCode, DOMString uafResponse);
+```java
+void notifyUAFResult(int responseCode, DOMString uafResponse);
+```
 
 #### Version Interface
 
-    Interface Version {
-        readonly attribute int majorVersion; 
-        readonly attribute int minorVersion;
-    }
+```java
+Interface Version {
+    readonly attribute int majorVersion; 
+    readonly attribute int minorVersion;
+}
+```
 
 #### Authenticator Interface
 
-    interface Authenticator {
-        readonly attribute DOMString AAID;
-        readonly attribute DOMString description;
-        readonly attribute DOMString logo;      
+```java
+interface Authenticator {
+    readonly attribute DOMString AAID;
+    readonly attribute DOMString description;
+    readonly attribute DOMString logo;
 
-        readonly attribute Version[] supportedUAFVersions;
-        readonly attribute long userVerification;
-        readonly attribute long keyProtection;
-        readonly attribute long attachmentHint;
-        readonly attribute long secureDisplay;
+    readonly attribute Version[] supportedUAFVersions;
+    readonly attribute long userVerification;
+    readonly attribute long keyProtection;
+    readonly attribute long attachmentHint;
+    readonly attribute long secureDisplay;
+    
+    readonly attribute int authenticationAlgorithm;
+    readonly attribute DOMString assertionScheme;
 
-        readonly attribute int authenticationAlgorithm;
-        readonly attribute DOMString assertionScheme;
-
-        // for future use
-        readonly attribute long additionalInfo;
-        // See FIDO UAF Registry of Predefined Values for constant definitions 
-    }
+    // for future use
+    readonly attribute long additionalInfo;
+    // See FIDO UAF Registry of Predefined Values for constant definitions 
+}
+```
 
 #### Discovery Interface
 
-    interface Discovery {
-        readonly attribute Version[] supportedUAFVersions; readonly attribute DOMString clientVendor;
-        readonly attribute Version clientVersion;
-        readonly attribute Authenticator[] availableAuthenticators; void checkPolicy(DOMString message, ErrorCallback cb);
-    }
+```java
+interface Discovery {
+    readonly attribute Version[] supportedUAFVersions; readonly attribute DOMString clientVendor;
+    readonly attribute Version clientVersion;
+    readonly attribute Authenticator[] availableAuthenticators; void checkPolicy(DOMString message, ErrorCallback cb);
+}
+```
 
 #### FIDOClient Interface
 
-    interface FIDOClient {
-        void processUAFOperation(
-            UAFMessage          message,
-            UAFResponseCallback completionCallback,
-            ErrorCallback       errorCallback
-        );
-    }
+```java
+interface FIDOClient {
+    void processUAFOperation(
+        UAFMessage          message,
+        UAFResponseCallback completionCallback,
+        ErrorCallback       errorCallback
+    );
+}
+```
 
 ### Android API
 
 #### IUAFClient.aidl
 
-    package org.fidoalliance.uaf.client;
-    import org.fidoalliance.uaf.client.IUAFErrorCallback;
-    import org.fidoalliance.uaf.client.IUAFResponseCallback;
-    import org.fidoalliance.uaf.client.Discovery;
-    import org.fidoalliance.uaf.client.UAFMessage;
+```java
+package org.fidoalliance.uaf.client;
+import org.fidoalliance.uaf.client.IUAFErrorCallback;
+import org.fidoalliance.uaf.client.IUAFResponseCallback;
+import org.fidoalliance.uaf.client.Discovery;
+import org.fidoalliance.uaf.client.UAFMessage;
     
-    import java.util.Map;
+import java.util.Map;
 
-    interface IUAFClient
-    {
-        Discovery getDiscovery();
+interface IUAFClient
+{
+    Discovery getDiscovery();
 
-        void notifyUAFResult(in int    responseCode,
-                             in String uafResponse);
-        void processUAFMessage(
-            in UAFMessage msg,
-            in String     origin,
-            in Map        channelBindings,
-            in boolean    checkPolicy,
-            in IUAFResponseCallback cb,
-            in IUAFErrorCallback errorCb
-        );
+    void notifyUAFResult(in int    responseCode,
+                         in String uafResponse);
+    void processUAFMessage(
+        in UAFMessage msg,
+        in String     origin,
+        in Map        channelBindings,
+        in boolean    checkPolicy,
+        in IUAFResponseCallback cb,
+        in IUAFErrorCallback errorCb
+    );
+```
 
 #### IUAFErrorCallback.aidl
 
-    package org.fidoalliance.uaf.client;
+```java
+package org.fidoalliance.uaf.client;
 
-    interface IUAFErrorCallback
-    {
-        void response(long code);
-    }
+interface IUAFErrorCallback
+{
+    void response(long code);
+}
+```
 
 #### IUAFResponseCallback.aidl
 
-    package org.fidoalliance.uaf.client;
+```java
+package org.fidoalliance.uaf.client;
 
-    import org.fidoalliance.uaf.client.UAFMessage;
+import org.fidoalliance.uaf.client.UAFMessage;
 
-    interface IUAFResponseCallback
-    {
-        void response(in UAFMessage uafResponse);
-    }
+interface IUAFResponseCallback
+{
+    void response(in UAFMessage uafResponse);
+}
+```
 
 #### UAFMesage.aidl
 
-    package org.fidoalliance.uaf.client;
+```java
+package org.fidoalliance.uaf.client;
 
-    parcelable UAFMessage;
+parcelable UAFMessage;
+```
 
 #### UAFMessage.java
 
-    package org.fidoalliance.uaf.client;
+```java
+package org.fidoalliance.uaf.client;
 
-    import android.os.Parcel;
-    import android.os.Parcelable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-    public class UAFMessage implements Parcelable {
+public class UAFMessage implements Parcelable {
 
-        public String uafProtocolMessage;
-        public String additionalData;
-        public static final Parcelable.Creator<UAFMessage> CREATOR
-            = new Parcelable.Creator<UAFMessage>() {
-                public UAFMessage createFromParcel(Parcel in) {
-                    return new UAFMessage(in);
-                }
-                public UAFMessage[] newArray(int size) {
-                    return new UAFMessage[size];
-                }
-        };
-        public UAFMessage() {
-        }
+    public String uafProtocolMessage;
+    public String additionalData;
+    public static final Parcelable.Creator<UAFMessage> CREATOR
+        = new Parcelable.Creator<UAFMessage>() {
+            public UAFMessage createFromParcel(Parcel in) {
+                return new UAFMessage(in);
+            }
+            public UAFMessage[] newArray(int size) {
+                return new UAFMessage[size];
+            }
+    };
+    public UAFMessage() {
+    }
 
-        private UAFMessage(Parcel in) { 
-            uafProtocolMessage = in.readString();
-            additionalData = in.readString(); 
-        }
+    private UAFMessage(Parcel in) { 
+        uafProtocolMessage = in.readString();
+        additionalData = in.readString(); 
+    }
         
-        @Override
-        public int describeContents() {
-            return 0; 
-        }
+    @Override
+    public int describeContents() {
+        return 0; 
+    }
         
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(uafProtocolMessage);
-            dest.writeString(additionalData); }
-        }
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(uafProtocolMessage);
+        dest.writeString(additionalData); }
+    }
+```
 
 #### Version.aidl
 
-    package org.fidoalliance.uaf.client;
+```java
+package org.fidoalliance.uaf.client;
 
-    parcelable Version;
+parcelable Version;
+```
 
 #### Version.java
 
-    package org.fidoalliance.uaf.client;
+```java
+package org.fidoalliance.uaf.client;
     
-    import java.util.ArrayList;
-    import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
-    import android.os.Parcel; 
-    import android.os.Parcelable;
+import android.os.Parcel; 
+import android.os.Parcelable;
 
-    public class Version implements Parcelable {
+public class Version implements Parcelable {
 
-        public int majorVersion;
-        public int minorVersion;
+    public int majorVersion;
+    public int minorVersion;
 
-        public static final Parcelable.Creator<Version> CREATOR 
-            = new Parcelable.Creator<Version>() {
-                public Discovery createFromParcel(Parcel in) { 
-                    return new Version(in);
-                }
-                public Version[] newArray(int size) { 
-                    return new Version[size];
-                }
-            };
-        public Version() {
-        }
-    
-        private Version(Parcel in) {
-            majorVersion = in.readInt();
-            minorVersion = in.readInt();
-        }
-    
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-    
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(majorVersion);
-            dest.writeInt(minorVersion);
-        }
+    public static final Parcelable.Creator<Version> CREATOR 
+        = new Parcelable.Creator<Version>() {
+            public Discovery createFromParcel(Parcel in) { 
+                return new Version(in);
+            }
+            public Version[] newArray(int size) { 
+                return new Version[size];
+            }
+        };
+    public Version() {
     }
+    
+    private Version(Parcel in) {
+        majorVersion = in.readInt();
+        minorVersion = in.readInt();
+    }
+    
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+    
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(majorVersion);
+        dest.writeInt(minorVersion);
+    }
+}
+```
 
 #### Discovery.aidl
 
-    package org.fidoalliance.uaf.client;
+```java
+package org.fidoalliance.uaf.client;
     
-    parcelable Discovery;
+parcelable Discovery;
+```
 
 #### Discovery.java
 
-    package org.fidoalliance.uaf.client; 718
+```java
+package org.fidoalliance.uaf.client; 718
     
-    import java.util.ArrayList;
-    import java.util.List;
-    
-    import android.os.Parcel;
-    import android.os.Parcelable;
-    
-    public class Discovery implements Parcelable {
+import java.util.ArrayList;
+import java.util.List;
+   
+import android.os.Parcel;
+import android.os.Parcelable;
+  
+public class Discovery implements Parcelable {
 
-        public List<Version> supportedUAFVersions =
-            new ArrayList<Version>();
-        public String  clientVendor;
-        public Version clientVersion    
+    public List<Version> supportedUAFVersions =
+        new ArrayList<Version>();
+    public String  clientVendor;
+    public Version clientVersion    
 
-        public List<Authenticator> availableAuthenticators = 
-                                        new ArrayList<Authenticator>(); 
+    public List<Authenticator> availableAuthenticators = 
+                                   new ArrayList<Authenticator>(); 
 
-        public static final Parcelable.Creator<Discovery> CREATOR = new Parcelable.Creator<Discovery>() {
-            public Discovery createFromParcel(Parcel in) { 
-                return new Discovery(in);
-            }
-            public Discovery[] newArray(int size) { 
-                return new Discovery[size];
-            } 
-        };  
-
-        public Discovery() { 
-        }   
-
-        private Discovery(Parcel in) { 
-            in.readTypedList(supportedUAFVersions,Version.CREATOR); 
-            clientVendor = in.readString();
-            clientVersion = in.readParcellable(null); 
-            in.readTypedList(availableAuthenticators,Authenticator.CREATOR);
-        }   
-
-        @Override
-        public int describeContents() {
-            return 0; 
-        }   
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeTypedList(version); 
-            dest.writeString(clientVendor); 
-            dest.writeParcelable(clientVersion, 0); 
-            dest.writeTypedList(availableAuthenticators);
+    public static final Parcelable.Creator<Discovery> CREATOR = new Parcelable.Creator<Discovery>() {
+        public Discovery createFromParcel(Parcel in) { 
+            return new Discovery(in);
+        }
+        public Discovery[] newArray(int size) { 
+            return new Discovery[size];
         } 
-    }
+    };  
+
+    public Discovery() { 
+    }   
+
+    private Discovery(Parcel in) { 
+        in.readTypedList(supportedUAFVersions,Version.CREATOR); 
+        clientVendor = in.readString();
+        clientVersion = in.readParcellable(null); 
+        in.readTypedList(availableAuthenticators,Authenticator.CREATOR);
+    }   
+
+    @Override
+    public int describeContents() {
+        return 0; 
+    }   
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(version); 
+        dest.writeString(clientVendor); 
+        dest.writeParcelable(clientVersion, 0); 
+        dest.writeTypedList(availableAuthenticators);
+    } 
+}
+```
 
 #### Authenticator.aidl
 
-    package org.fidoalliance.uaf.client;
-    parcelable Authenticator;
+```java
+package org.fidoalliance.uaf.client;
+parcelable Authenticator;
+```
 
 #### Authenticator.java
 
-    package org.fidoalliance.uaf.client;
+```java
+package org.fidoalliance.uaf.client;
 
-    import java.util.List;
-    import java.util.ArrayList;
+import java.util.List;
+import java.util.ArrayList;
 
-    import android.os.Parcel;
-    import android.os.Parcelable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-    public class Authenticator implements Parcelable {
-        public String AAID;
-        public String description;
-        public String logo;
-        public long   userVerification;
-        public long   keyProtection;
-        public long   attachmentHint;
-        public long   secureDisplay;
-        public String assertionScheme;
-        public long additionalInfo;
-        public int authenticationAlgorithm;
-        public List<Version> supportedUAFVersions;
+public class Authenticator implements Parcelable {
+    public String AAID;
+    public String description;
+    public String logo;
+    public long   userVerification;
+    public long   keyProtection;
+    public long   attachmentHint;
+    public long   secureDisplay;
+    public String assertionScheme;
+    public long additionalInfo;
+    public int authenticationAlgorithm;
+    public List<Version> supportedUAFVersions;
         
-        public static final Parcelable.Creator<Authenticator> CREATOR
-            = new Parcelable.Creator<Authenticator>() {
+    public static final Parcelable.Creator<Authenticator> CREATOR
+        = new Parcelable.Creator<Authenticator>() {
             
-            public Authenticator createFromParcel(Parcel in) {
-                return new Authenticator(in);
-            }
+        public Authenticator createFromParcel(Parcel in) {
+            return new Authenticator(in);
+        }
 
-            public Authenticator[] newArray(int size) {
-                return new Authenticator[size];
-            }
-        };
-        private Authenticator(Parcel in) {
-            AAID             = in.readString();
-            description      = in.readString();
-            logo             = in.readString();
-            userVerification = in.readString();
-            keyProtection    = in.readString();
-            attachmentHint   = in.readString();
-            secureDisplay    = in.readString();
-            assertionScheme  = in.readString();
-            additionalInfo   = in.readLong();   
+        public Authenticator[] newArray(int size) {
+            return new Authenticator[size];
+        }
+    };
+    private Authenticator(Parcel in) {
+        AAID             = in.readString();
+        description      = in.readString();
+        logo             = in.readString();
+        userVerification = in.readString();
+        keyProtection    = in.readString();
+        attachmentHint   = in.readString();
+        secureDisplay    = in.readString();
+        assertionScheme  = in.readString();
+        additionalInfo   = in.readLong();   
 
-            authenticationAlgorithm = in.readInt();
-            in.readTypedList(supportedUAFVersions,
-                Version.CREATOR);
-        }
-                
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-        
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(AAID);
-            dest.writeString(description);
-            dest.writeString(logo);
-            dest.writeLong(userVerification);
-            dest.writeLong(keyProtection);
-            dest.writeLong(attachmentHint);
-            dest.writeLong(secureDisplay);
-            dest.writeString(assertionScheme);
-            dest.writeLong(additionalInfo);
-            dest.writeInt(authenticationAlgorithm);
-            dest.writeTypedArray(supportedUAFVersions);
-        }
+        authenticationAlgorithm = in.readInt();
+        in.readTypedList(supportedUAFVersions,
+            Version.CREATOR);
     }
-    
+                
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+        
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(AAID);
+        dest.writeString(description);
+        dest.writeString(logo);
+        dest.writeLong(userVerification);
+        dest.writeLong(keyProtection);
+        dest.writeLong(attachmentHint);
+        dest.writeLong(secureDisplay);
+        dest.writeString(assertionScheme);
+        dest.writeLong(additionalInfo);
+        dest.writeInt(authenticationAlgorithm);
+        dest.writeTypedArray(supportedUAFVersions);
+    }
+}
+```
