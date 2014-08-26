@@ -27,14 +27,21 @@
 
 #### UAFMessage Dictionary
 
+是一个原生的UAF协议的一个包装
+
 ```java
 Dictionary UAFMessage {
+    //最原始的UAF协议字符串
     DOMString uafProtocolMessage;
+    
+    //额外的信息，是一个JSON结构
     Object additionalData;
 }
 ```
 
 #### UAFResponseCallback
+
+FIDO客户端提供的，供application异步回调的接口
 
 ```java
 callback UAFResponseCallback = void (UAFMessage uafResponse);
@@ -42,27 +49,51 @@ callback UAFResponseCallback = void (UAFMessage uafResponse);
 
 #### ErrorCallback
 
+当发生错误的时候的回调方法
+
 ```java
 callback ErrorCallback = void (ErrorCode code);
 interface ErrorCode {
-    const short NO_ERROR = 0x0;
-    FIDO UAF Application API and Transport Binding Specification
-    const short WAIT_USER_ACTION
-    const short INSECURE_TRANSPORT
-    const short USER_CANCELLED
-    const short UNSUPPORTED_VERSION
+    //没有错误被收集，当收到这个消息以后，程序不应该继续等待UAF响应
+    const short NO_ERROR                  = 0x0;
+
+    //未使用https或者是页面里有不安全的元素
+    const short INSECURE_TRANSPORT        = 0x1;
+
+    //等待用户操作
+    const short WAIT_USER_ACTION          = 0x2;
+    
+    //用户取消
+    const short USER_CANCELLED            = 0x3;
+    
+    //不支持的版本
+    const short UNSUPPORTED_VERSION       = 0x4;
+
+    //未发现受支持的认证器
     const short NO_SUITABLE_AUTHENTICATOR = 0x5;
-    const short PROTOCOL_ERROR const short UNTRUSTED_FACET_ID const short UNKNOWN
+    
+    //协议消息错误
+    const short PROTOCOL_ERROR            = 0x6;
+    
+    //不信任的FacetID
+    const short UNTRUSTED_FACET_ID        = 0x7;
+
+    //未知错误
+    const short UNKNOWN                   = 0xFF;
 }
 ```
 
 #### notifyUAFResult Operation
+
+UAF应用告诉FIDO客户端它收到的响应码和响应内容
 
 ```java
 void notifyUAFResult(int responseCode, DOMString uafResponse);
 ```
 
 #### Version Interface
+
+描述协议版本信息
 
 ```java
 Interface Version {
@@ -76,16 +107,26 @@ Interface Version {
 ```java
 interface Authenticator {
     readonly attribute DOMString AAID;
+    //认证器的人性化描述
     readonly attribute DOMString description;
+    //认证器的Logo，使用data: url [RFC2397]存储
     readonly attribute DOMString logo;
 
+    //表示认证器支持的UAF协议
     readonly attribute Version[] supportedUAFVersions;
+
+    //一组比特标志，表示认证器支持的用户认证方式，使用常数USER_VERIFY_表示
     readonly attribute long userVerification;
+    //一组比特标志，表示认证器使用的密钥保护办法，使用常数KEY_PROTECTION表示
     readonly attribute long keyProtection;
+    //一组比特标志，表示认证器连接FIDO客户端软件的方法，使用常数ATTACHMENT_HINT表示
     readonly attribute long attachmentHint;
+    //一组比特标志，表示安全显示的种类，使用常数SECURE_DISPLAY_表示
     readonly attribute long secureDisplay;
     
+    //表示认证器支持的算法
     readonly attribute int authenticationAlgorithm;
+    //认证器使用的编码方式
     readonly attribute DOMString assertionScheme;
 
     // for future use
@@ -96,21 +137,35 @@ interface Authenticator {
 
 #### Discovery Interface
 
+用于发现用户的客户端软件和设备是否支持UAF协议以及认证器的兼容性问题
+
 ```java
 interface Discovery {
-    readonly attribute Version[] supportedUAFVersions; readonly attribute DOMString clientVendor;
+    //客户端支持的UAF协议，按照优先级排序
+    readonly attribute Version[] supportedUAFVersions; 
+    //客户端供应商
+    readonly attribute DOMString clientVendor;
+    //客户端的版本
     readonly attribute Version clientVersion;
-    readonly attribute Authenticator[] availableAuthenticators; void checkPolicy(DOMString message, ErrorCallback cb);
+    //可用的认证器
+    readonly attribute Authenticator[] availableAuthenticators; 
+    //在不需要用户允许的情况下，询问FIDO插件是否支持对应的消息，如果支持，必须返回NO_ERROR
+    void checkPolicy(DOMString message, ErrorCallback cb);
 }
 ```
 
 #### FIDOClient Interface
 
+应用可以异步的发送UAF请求消息给客户端，并且等待返回
+
 ```java
 interface FIDOClient {
     void processUAFOperation(
+        //客户端使用的UAF消息
         UAFMessage          message,
+        //接收返回的调用
         UAFResponseCallback completionCallback,
+        //发生错误的时候的调用
         ErrorCallback       errorCallback
     );
 }
@@ -119,6 +174,8 @@ interface FIDOClient {
 ### Android API
 
 #### IUAFClient.aidl
+
+安卓设备和FIDO客户端的主要接口,
 
 ```java
 package org.fidoalliance.uaf.client;
@@ -145,7 +202,20 @@ interface IUAFClient
     );
 ```
 
+需要添加以下权限
+
+```xml
+<permission
+    android:name="org.fidoalliance.uaf.permissions.ACT_AS_WEB_BROWSER"
+    android:label="Act as a browser for FIDO registrations."
+    android:description="This application may act as a web browser,
+        creating new and accessing existing FIDO registrations for anydomain."
+    android:protectionLevel="dangerous" />
+```
+
 #### IUAFErrorCallback.aidl
+
+FIDO客户端返回错误信息使用的接口
 
 ```java
 package org.fidoalliance.uaf.client;
@@ -157,6 +227,10 @@ interface IUAFErrorCallback
 ```
 
 #### IUAFResponseCallback.aidl
+
+*processUAFMessage* 调用成功返回以后使用的回调函数
+
+如果 *checkPolicy* 被设置了，那么该方法不会被调用，只有 *IUAFErrorCallback* 会被调用
 
 ```java
 package org.fidoalliance.uaf.client;
@@ -171,6 +245,8 @@ interface IUAFResponseCallback
 
 #### UAFMesage.aidl
 
+*UAFMessage.java* 的包装
+
 ```java
 package org.fidoalliance.uaf.client;
 
@@ -178,6 +254,10 @@ parcelable UAFMessage;
 ```
 
 #### UAFMessage.java
+
+应用程序交互的主要消息，被用于双边交互，应用与FIDO客户端，应用与FIDO服务器端。
+使用 *additionalData* 来包含应用程序相关的信息和协议扩展
+应用程序必须测试消息内容是否合法
 
 ```java
 package org.fidoalliance.uaf.client;
@@ -220,6 +300,8 @@ public class UAFMessage implements Parcelable {
 
 #### Version.aidl
 
+*Version.java* 的包装
+
 ```java
 package org.fidoalliance.uaf.client;
 
@@ -227,6 +309,8 @@ parcelable Version;
 ```
 
 #### Version.java
+
+描述主版本号和次版本号
 
 ```java
 package org.fidoalliance.uaf.client;
@@ -274,6 +358,8 @@ public class Version implements Parcelable {
 
 #### Discovery.aidl
 
+*Discovery.java* 的包装
+
 ```java
 package org.fidoalliance.uaf.client;
     
@@ -281,6 +367,8 @@ parcelable Discovery;
 ```
 
 #### Discovery.java
+
+应用使用该类来查询用户设备上存在的FIDO客户端和FIDO认证器，详情见 *Discovery Interface*
 
 ```java
 package org.fidoalliance.uaf.client; 718
@@ -337,12 +425,16 @@ public class Discovery implements Parcelable {
 
 #### Authenticator.aidl
 
+*Authenticator.java* 的包装
+
 ```java
 package org.fidoalliance.uaf.client;
 parcelable Authenticator;
 ```
 
 #### Authenticator.java
+
+表示在 *Discovery* 里使用的认证器实例的元数据
 
 ```java
 package org.fidoalliance.uaf.client;
